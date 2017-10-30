@@ -1,0 +1,27 @@
+addons:
+  postgresql: "9.6"
+
+before_install:
+  # Build a version of Redis that has stream supported. As soon as this is even
+  # in the unstable release, we of course no longer have to do this, so keep an
+  # eye out.
+  - curl -L -o redis-streams.zip https://github.com/antirez/redis/archive/streams.zip &&
+    unzip redis-streams.zip &&
+    cd redis-streams &&
+    make
+  - redis-streams/src/redis-server &
+
+before_script:
+  - createdb rocket-rides-log-test
+  - psql rocket-rides-log-test < schema.sql
+
+language: ruby
+
+notifications:
+  email:
+    on_success: never
+
+rvm:
+  - 2.4.2
+
+sudo: false
