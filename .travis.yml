@@ -9,7 +9,7 @@ before_install:
     unzip redis-streams.zip &&
     cd redis-streams &&
     make
-  - redis-streams/src/redis-server &
+  - redis-streams/src/redis-server --port 6388 &
 
 before_script:
   - createdb rocket-rides-log-test

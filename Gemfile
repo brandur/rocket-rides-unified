@@ -3,6 +3,7 @@ source "https://rubygems.org"
 gem "excon"
 gem "pg"
 gem "puma"
+gem "redis"
 gem "sequel"
 gem "sinatra"
 
