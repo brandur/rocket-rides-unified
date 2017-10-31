@@ -46,19 +46,29 @@ class Consumer
 
       records = RDB.xrange(STREAM_NAME, start_id, "+", "COUNT", BATCH_SIZE)
       unless records.empty?
+        # get or create a new state for this consumer
+        state = ConsumerState.first(name: name)
+        state = ConsumerState.new(name: name, total_distance: 0.0) if state.nil?
+
         records.each do |record|
           _id, fields = record
 
           # ["data", "{\"id\":123}"] -> {"data"=>"{\"id\":123}"}
           fields = Hash[*fields]
 
-          $stdout.puts "Consumed record: #{fields["data"]}"
+          data = JSON.parse(fields["data"])
+          state.total_distance += data["distance"]
+
+          $stdout.puts "Consumed record: #{fields["data"]} " \
+            "(total_distance = #{state.total_distance.round(1)}m)"
           num_consumed += 1
         end
 
+        # now that all records for this round are consumed, persist state
+        state.save
+
         # upsert the last ID we consumed under our given consumer name
         last_id, _fields = records.last
-        #Checkpoint.
         DB[:checkpoints].
           insert_conflict(target: :name, update: {
             last_id: Sequel[:excluded][:last_id]
