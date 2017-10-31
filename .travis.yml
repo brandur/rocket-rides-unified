@@ -7,8 +7,9 @@ before_install:
   # eye out.
   - curl -L -o redis-streams.zip https://github.com/antirez/redis/archive/streams.zip &&
     unzip redis-streams.zip &&
-    cd redis-streams &&
-    make
+    pushd redis-streams &&
+    make &&
+    popd
   - redis-streams/src/redis-server --port 6388 &
 
 before_script:
