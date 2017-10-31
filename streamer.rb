@@ -4,11 +4,11 @@ require_relative "./api"
 class Streamer
   def run
     loop do
-      num_enqueued = run_once
+      num_streamed = run_once
 
       # Sleep for a while if we didn't find anything to enqueue on the last
       # run.
-      if num_enqueued == 0
+      if num_streamed == 0
         $stdout.puts "Sleeping for #{SLEEP_DURATION}"
         sleep(SLEEP_DURATION)
       end
@@ -16,7 +16,7 @@ class Streamer
   end
 
   def run_once
-    num_enqueued = 0
+    num_streamed = 0
 
     # Need at least repeatable read isolation level so that our DELETE after
     # enqueueing will see the same records as the original SELECT.
@@ -30,7 +30,7 @@ class Streamer
             RDB.xadd(STREAM_NAME, "*", "data", JSON.generate(record.data))
 
             $stdout.puts "Enqueued record: #{record.action} #{record.object}"
-            num_enqueued += 1
+            num_streamed += 1
           end
         end
 
@@ -38,7 +38,7 @@ class Streamer
       end
     end
 
-    num_enqueued
+    num_streamed
   end
 
   # Number of records to try to stream on each batch.
