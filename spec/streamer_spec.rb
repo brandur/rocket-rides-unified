@@ -18,9 +18,9 @@ RSpec.describe Streamer do
 
     expect(StagedLogRecord.count).to eq(0)
 
-    res = RDB.xrange(STREAM_NAME, "-", "+", "COUNT", "1")
-    expect(res.count).to eq(1)
-    _id, fields = res.first
+    records = RDB.xrange(STREAM_NAME, "-", "+", "COUNT", "1")
+    expect(records.count).to eq(1)
+    _id, fields = records.first
 
     # ["data", "{\"id\":123}"] -> {"data"=>"{\"id\":123}"}
     fields = Hash[*fields]

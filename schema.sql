@@ -1,6 +1,16 @@
 BEGIN;
 
 --
+-- A relation that allows consumers to track what they last consumed from the
+-- stream.
+--
+CREATE TABLE checkpoints (
+    id      BIGSERIAL PRIMARY KEY,
+    name    TEXT      NOT NULL,
+    last_id TEXT      NOT NULL
+);
+
+--
 -- A relation representing a single ride by a user.
 --
 CREATE TABLE rides (

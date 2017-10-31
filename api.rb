@@ -41,6 +41,9 @@ OBJECT_RIDE = "ride"
 class Ride < Sequel::Model
 end
 
+class Checkpoint < Sequel::Model
+end
+
 class StagedLogRecord < Sequel::Model
 end
 
