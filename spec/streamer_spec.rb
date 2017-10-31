@@ -33,6 +33,10 @@ RSpec.describe Streamer do
     expect(num_streamed).to eq(0)
   end
 
+  #
+  # private
+  #
+
   private def create_staged_log_record(id:)
     StagedLogRecord.insert(
       action: ACTION_CREATE,

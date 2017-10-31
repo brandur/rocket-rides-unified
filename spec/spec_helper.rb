@@ -8,6 +8,7 @@ ENV["REDIS_URL"] = "redis://localhost:6388/15"
 require_relative "../api"
 
 def clear_database
+  DB.run("TRUNCATE checkpoints CASCADE")
   DB.run("TRUNCATE rides CASCADE")
   DB.run("TRUNCATE staged_log_records CASCADE")
 end

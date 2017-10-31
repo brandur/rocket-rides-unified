@@ -6,7 +6,7 @@ BEGIN;
 --
 CREATE TABLE checkpoints (
     id      BIGSERIAL PRIMARY KEY,
-    name    TEXT      NOT NULL,
+    name    TEXT      NOT NULL UNIQUE,
     last_id TEXT      NOT NULL
 );
 
