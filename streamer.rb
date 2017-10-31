@@ -27,7 +27,7 @@ class Streamer
         RDB.multi do
           records.each do |record|
             # XADD mystream * data <JSON-encoded blob>
-            RDB.call(["XADD", STREAM_NAME, "*", "data", JSON.generate(record.data)])
+            RDB.xadd(STREAM_NAME, "*", "data", JSON.generate(record.data))
 
             $stdout.puts "Enqueued record: #{record.action} #{record.object}"
             num_enqueued += 1

@@ -18,7 +18,7 @@ RSpec.describe Streamer do
 
     expect(StagedLogRecord.count).to eq(0)
 
-    res = RDB.call(["XRANGE", STREAM_NAME, "-", "+", "COUNT", "1"])
+    res = RDB.xrange(STREAM_NAME, "-", "+", "COUNT", "1")
     expect(res.count).to eq(1)
     _id, fields = res.first
 
