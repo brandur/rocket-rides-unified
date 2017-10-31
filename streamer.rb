@@ -26,8 +26,11 @@ class Streamer
       unless records.empty?
         RDB.multi do
           records.each do |record|
-            # XADD mystream * data <JSON-encoded blob>
-            RDB.xadd(STREAM_NAME, "*", "data", JSON.generate(record.data))
+            # XADD mystream MAXLEN ~ 1000 * data <JSON-encoded blob>
+            #
+            # `MAXLEN 1000` caps the stream at a maximum size. The tilde (~) in
+            # there makes the cap approximate so that it's faster to trim.
+            RDB.xadd(STREAM_NAME, "MAXLEN", "~", STREAM_MAXLEN, "*", "data", JSON.generate(record.data))
 
             $stdout.puts "Enqueued record: #{record.action} #{record.object}"
             num_streamed += 1
