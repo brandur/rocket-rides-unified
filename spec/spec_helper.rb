@@ -15,3 +15,11 @@ end
 def clear_redis
   RDB.flushdb
 end
+
+def suppress_stdout
+  $stdout = StringIO.new unless verbose?
+end
+
+def verbose?
+  ENV["VERBOSE"] == "true"
+end

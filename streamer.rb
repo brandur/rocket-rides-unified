@@ -1,3 +1,4 @@
+require "json"
 require_relative "./api"
 
 class Streamer
@@ -23,9 +24,14 @@ class Streamer
       records = StagedLogRecord.order(:id).limit(BATCH_SIZE)
 
       unless records.empty?
-        records.each do |record|
-          $stdout.puts "Enqueued record: #{record.action} #{record.object}"
-          num_enqueued += 1
+        RDB.multi do
+          records.each do |record|
+            # XADD mystream * data <JSON-encoded blob>
+            RDB.call(["XADD", STREAM_NAME, "*", "data", JSON.generate(record.data)])
+
+            $stdout.puts "Enqueued record: #{record.action} #{record.object}"
+            num_enqueued += 1
+          end
         end
 
         StagedLogRecord.where(Sequel.lit("id <= ?", records.last.id)).delete
