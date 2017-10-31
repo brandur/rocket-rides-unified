@@ -69,7 +69,7 @@ module Messages
   end
 
   def self.ok(distance:)
-    "Payment accepted. Your pilot is on their way! (Distance: #{distance}m)"
+    "Payment accepted. Your pilot is on their way! distance=#{distance}m"
   end
 end
 

@@ -60,7 +60,7 @@ class Consumer
           state.total_distance += data["distance"]
 
           $stdout.puts "Consumed record: #{fields["data"]} " \
-            "(total_distance = #{state.total_distance.round(1)}m)"
+            "total_distance=#{state.total_distance.round(1)}m"
           num_consumed += 1
         end
 
