@@ -47,7 +47,7 @@ class Consumer
       records = RDB.xrange(STREAM_NAME, start_id, "+", "COUNT", BATCH_SIZE)
       unless records.empty?
         records.each do |record|
-          _id, fields = records.first
+          _id, fields = record
 
           # ["data", "{\"id\":123}"] -> {"data"=>"{\"id\":123}"}
           fields = Hash[*fields]
