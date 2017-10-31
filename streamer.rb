@@ -6,7 +6,7 @@ class Streamer
     loop do
       num_streamed = run_once
 
-      # Sleep for a while if we didn't find anything to enqueue on the last
+      # Sleep for a while if we didn't find anything to stream on the last
       # run.
       if num_streamed == 0
         $stdout.puts "Sleeping for #{SLEEP_DURATION}"
