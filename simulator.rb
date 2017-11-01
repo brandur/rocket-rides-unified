@@ -49,7 +49,7 @@ if __FILE__ == $0
   $stderr.sync = true
   $stdout.sync = true
 
-  port = ENV["API_PORT"] || abort("need API_PORT (where the API should be running)")
+  port = ENV["API_PORT"] || abort("need API_PORT")
 
   # wait a moment for the API to come up
   sleep(3)
