@@ -20,7 +20,7 @@ class API < Sinatra::Base
         object: OBJECT_RIDE,
         data: Sequel.pg_jsonb({
           id:       ride.id,
-          distance: params["distance"],
+          distance: ride.distance,
         })
       )
 
