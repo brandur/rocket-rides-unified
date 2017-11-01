@@ -5,9 +5,10 @@ BEGIN;
 -- stream.
 --
 CREATE TABLE checkpoints (
-    id      BIGSERIAL PRIMARY KEY,
-    name    TEXT      NOT NULL UNIQUE,
-    last_id TEXT      NOT NULL
+    id            BIGSERIAL PRIMARY KEY,
+    name          TEXT      NOT NULL UNIQUE,
+    last_redis_id TEXT      NOT NULL,
+    last_ride_id  BIGINT    NOT NULL
 );
 
 --

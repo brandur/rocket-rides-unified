@@ -42,7 +42,9 @@ class Consumer
       # start from the earliest record in the stream. If we don't already have
       # a checkpoint, we start with that.
       start_id = "-"
-      start_id = self.class.increment(checkpoint.last_id) unless checkpoint.nil?
+      start_id = self.class.increment(checkpoint.last_redis_id) unless checkpoint.nil?
+
+      checkpoint = Checkpoint.new(name: name, last_ride_id: 0) if checkpoint.nil?
 
       records = RDB.xrange(STREAM_NAME, start_id, "+", "COUNT", BATCH_SIZE)
       unless records.empty?
@@ -51,29 +53,36 @@ class Consumer
         state = ConsumerState.new(name: name, total_distance: 0.0) if state.nil?
 
         records.each do |record|
-          _id, fields = record
+          redis_id, fields = record
 
           # ["data", "{\"id\":123}"] -> {"data"=>"{\"id\":123}"}
           fields = Hash[*fields]
 
           data = JSON.parse(fields["data"])
+
+          # if the ride's ID is lower or equal to one that we know we consumed,
+          # skip it; this is a double send
+          if data["id"] <= checkpoint.last_ride_id
+            $stdout.puts "Skipped record: #{fields["data"]} " \
+              "(already consumed this ride ID)"
+            next
+          end
+
           state.total_distance += data["distance"]
 
           $stdout.puts "Consumed record: #{fields["data"]} " \
             "total_distance=#{state.total_distance.round(1)}m"
           num_consumed += 1
+
+          checkpoint.last_redis_id = redis_id
+          checkpoint.last_ride_id = data["id"]
         end
 
         # now that all records for this round are consumed, persist state
         state.save
 
-        # upsert the last ID we consumed under our given consumer name
-        last_id, _fields = records.last
-        DB[:checkpoints].
-          insert_conflict(target: :name, update: {
-            last_id: Sequel[:excluded][:last_id]
-          }).
-          insert(name: name, last_id: last_id)
+        # and persist the changes to the checkpoint
+        checkpoint.save
       end
     end
 

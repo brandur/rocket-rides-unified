@@ -4,7 +4,8 @@ require_relative "./api"
 class Streamer
   def run
     loop do
-      num_streamed = run_once
+      # simulate double-send some amount of the time
+      num_streamed = run_once(send_twice: rand() < 0.10)
 
       # Sleep for a while if we didn't find anything to stream on the last
       # run.
@@ -15,7 +16,16 @@ class Streamer
     end
   end
 
-  def run_once
+  # Runs the process one time: all staged records are iterated through, pushed
+  # into the stream, and then removed.
+  #
+  # The special `send_twice` parameter is there to simulate failure in the
+  # system. In some cases this loop might fail midway through so that some
+  # records were added to Redis, and some weren't. The process will retry and
+  # probably succeed that second time through, but even so the stream will now
+  # contain duplicated records. `send_twice` adds all staged records into the
+  # stream twice to simulate this type of event.
+  def run_once(send_twice: false)
     num_streamed = 0
 
     # Need at least repeatable read isolation level so that our DELETE after
@@ -26,14 +36,16 @@ class Streamer
       unless records.empty?
         RDB.multi do
           records.each do |record|
-            # XADD mystream MAXLEN ~ 1000 * data <JSON-encoded blob>
-            #
-            # `MAXLEN 1000` caps the stream at a maximum size. The tilde (~) in
-            # there makes the cap approximate so that it's faster to trim.
-            RDB.xadd(STREAM_NAME, "MAXLEN", "~", STREAM_MAXLEN, "*", "data", JSON.generate(record.data))
+            stream(record.data)
+            num_streamed += 1
+
+            # simulate a double-send by adding the same record again
+            if send_twice
+              stream(record.data)
+              num_streamed += 1
+            end
 
             $stdout.puts "Enqueued record: #{record.action} #{record.object}"
-            num_streamed += 1
           end
         end
 
@@ -44,6 +56,10 @@ class Streamer
     num_streamed
   end
 
+  #
+  # private
+  #
+
   # Number of records to try to stream on each batch.
   BATCH_SIZE = 1000
   private_constant :BATCH_SIZE
@@ -52,6 +68,11 @@ class Streamer
   # to stream.
   SLEEP_DURATION = 5
   private_constant :SLEEP_DURATION
+
+  private def stream(data)
+    # XADD mystream * data <JSON-encoded blob>
+    RDB.xadd(STREAM_NAME, "*", "data", JSON.generate(data))
+  end
 end
 
 #

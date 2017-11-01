@@ -28,6 +28,12 @@ RSpec.describe Streamer do
     expect(data["id"]).to eq(id)
   end
 
+  it "streams a staged log record twice if prompted" do
+    create_staged_log_record(id: 123)
+    num_streamed = Streamer.new.run_once(send_twice: true)
+    expect(num_streamed).to eq(2)
+  end
+
   it "no-ops on an empty database" do
     num_streamed = Streamer.new.run_once
     expect(num_streamed).to eq(0)
