@@ -27,8 +27,9 @@ CREATE TABLE consumer_states (
 -- A relation representing a single ride by a user.
 --
 CREATE TABLE rides (
-    id         BIGSERIAL   PRIMARY KEY,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    id         BIGSERIAL        PRIMARY KEY,
+    created_at TIMESTAMPTZ      NOT NULL DEFAULT now(),
+    distance   DOUBLE PRECISION NOT NULL
 );
 
 --

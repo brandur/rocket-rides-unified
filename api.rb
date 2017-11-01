@@ -11,7 +11,7 @@ class API < Sinatra::Base
     params = validate_params(request)
 
     DB.transaction(isolation: :serializable) do
-      ride = Ride.create
+      ride = Ride.create(distance: params["distance"])
 
       StagedLogRecord.insert(
         action: ACTION_CREATE,
