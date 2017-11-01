@@ -4,6 +4,10 @@ require "securerandom"
 require_relative "./api"
 
 class Simulator
+  def initialize(port:)
+    self.port = port
+  end
+
   def run
     loop do
       run_once
@@ -14,7 +18,7 @@ class Simulator
   end
 
   def run_once
-    http = Net::HTTP.new("localhost", "5000")
+    http = Net::HTTP.new("localhost", port)
     request = Net::HTTP::Post.new("/rides")
     request.set_form_data({
       "distance" => rand * (MAX_DISTANCE - MIN_DISTANCE) + MIN_DISTANCE
@@ -32,6 +36,8 @@ class Simulator
   private_constant :MAX_DISTANCE
   MIN_DISTANCE = 5.0
   private_constant :MIN_DISTANCE
+
+  attr_accessor :port
 end
 
 #
@@ -43,5 +49,10 @@ if __FILE__ == $0
   $stderr.sync = true
   $stdout.sync = true
 
-  Simulator.new.run
+  port = ENV["API_PORT"] || abort("need API_PORT (where the API should be running)")
+
+  # wait a moment for the API to come up
+  sleep(3)
+
+  Simulator.new(port: port).run
 end
