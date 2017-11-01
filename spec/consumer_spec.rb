@@ -42,6 +42,11 @@ RSpec.describe Consumer do
     expect(ConsumerState.first(name: NAME).total_distance).to eq(5.0)
   end
 
+  it "no-ops on an empty database" do
+    num_consumed = Consumer.new(name: NAME).run_once
+    expect(num_consumed).to eq(0)
+  end
+
   it "doesn't consume a double-send log record" do
     # note the same ID
     create_log_record({ id: 123, distance: 2.0 })
@@ -54,9 +59,11 @@ RSpec.describe Consumer do
     expect(ConsumerState.first(name: NAME).total_distance).to eq(2.0)
   end
 
-  it "no-ops on an empty database" do
-    num_consumed = Consumer.new(name: NAME).run_once
-    expect(num_consumed).to eq(0)
+  it "simulates a crash if requested" do
+    create_log_record({ id: 123, distance: 2.0 })
+    expect do
+      Consumer.new(name: NAME).run_once(simulate_crash: true)
+    end.to raise_error(Consumer::SimulatedCrashError)
   end
 
   #

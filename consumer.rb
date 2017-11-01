@@ -21,18 +21,24 @@ class Consumer
     $stdout.puts "Starting consumer: #{name}"
 
     loop do
-      num_consumed = run_once
+      begin
+        # simulate a consumer crash some amount of the time
+        num_consumed = run_once(simulate_crash: rand() < 0.10)
 
-      # Sleep for a while if we didn't find anything to consume on the last
-      # run.
-      if num_consumed == 0
-        $stdout.puts "Sleeping for #{SLEEP_DURATION}"
-        sleep(SLEEP_DURATION)
+        # Sleep for a while if we didn't find anything to consume on the last
+        # run.
+        if num_consumed == 0
+          $stdout.puts "Sleeping for #{SLEEP_DURATION}"
+          sleep(SLEEP_DURATION)
+        end
+
+      rescue SimulatedCrashError
+        $stdout.puts "Crash simulated! Records consumed but transaction aborted."
       end
     end
   end
 
-  def run_once
+  def run_once(simulate_crash: false)
     num_consumed = 0
 
     DB.transaction do
@@ -83,6 +89,8 @@ class Consumer
 
         # and persist the changes to the checkpoint
         checkpoint.save
+
+        raise SimulatedCrashError if simulate_crash
       end
     end
 
@@ -90,6 +98,9 @@ class Consumer
   end
 
   private
+
+  class SimulatedCrashError < StandardError
+  end
 
   # Number of records to try to consume on each batch.
   BATCH_SIZE = 1000
