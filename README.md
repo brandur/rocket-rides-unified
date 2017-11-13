@@ -1,8 +1,8 @@
 # rocket-rides-log [![Build Status](https://travis-ci.org/brandur/rocket-rides-log.svg?branch=master)](https://travis-ci.org/brandur/rocket-rides-log)
 
 This is a project based on the original [Rocket Rides][rides] repository to
-demonstrate what it might look like to implement a log-based architecture. See
-[the associated article][log] for full details.
+demonstrate what it might look like to implement a robust log-based
+architecture. See [the associated article][log] for full details.
 
 The core `api` process publishes records to a Redis stream in the same
 transaction (with the help of the `streamer`) that it uses to persist its
