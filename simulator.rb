@@ -11,7 +11,7 @@ class Simulator
   def run
     loop do
       run_once
-      duration = rand(2)
+      duration = rand * 2
       $stdout.puts "Sleeping for #{duration}"
       sleep(duration)
     end
